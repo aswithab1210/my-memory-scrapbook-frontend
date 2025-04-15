@@ -1,4 +1,5 @@
 // netlify/functions/addMemory.js
+console.log('Current working directory:', __dirname);
 const connectToDatabase = require('./db');
 const Memory = require('./models/memory');  // Adjusted to the correct path
 
