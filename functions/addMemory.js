@@ -1,6 +1,6 @@
 // netlify/functions/addMemory.js
 const connectToDatabase = require('./db');
-const Memory = require('../models/memory');
+const Memory = require('./models/memory');  // Adjusted to the correct path
 
 exports.handler = async function (event, context) {
   await connectToDatabase();
