@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import MemoryCard from "./components/MemoryCard";
 import AddMemoryForm from "./components/AddMemoryForm";
-import { FaSearch } from "react-icons/fa";
 import Papa from "papaparse";
 import axios from "axios";
 
