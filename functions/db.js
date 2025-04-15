@@ -1,7 +1,8 @@
 // netlify/functions/db.js
 const mongoose = require('mongoose');
 
-let isConnected = false;  // Track the connection status
+// Track connection status
+let isConnected = false;
 
 const connectToDatabase = async () => {
   if (isConnected) {
@@ -10,10 +11,13 @@ const connectToDatabase = async () => {
   }
 
   try {
+    // Connect to MongoDB using the URI from environment variable
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
+
+    // Set connection flag to true
     isConnected = true;
     console.log('Successfully connected to MongoDB');
   } catch (error) {
