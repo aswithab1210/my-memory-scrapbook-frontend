@@ -34,6 +34,7 @@ const App = () => {
   // Add or Edit Memory
   const handleAddMemory = (memory) => {
     if (editMemoryId) {
+      // PUT request for updating an existing memory
       axios
         .put(`${apiBase}/${editMemoryId}`, memory)
         .then((response) => {
@@ -46,6 +47,7 @@ const App = () => {
         })
         .catch((err) => console.error("Error updating memory:", err));
     } else {
+      // POST request for adding a new memory
       axios
         .post(apiBase, memory)
         .then((response) => {
@@ -53,10 +55,11 @@ const App = () => {
         })
         .catch((err) => console.error("Error adding memory:", err));
     }
-
+  
     setIsModalOpen(false);
     setEditMemoryId(null);
   };
+  
 
   // Start editing memory
   const handleEdit = (id) => {

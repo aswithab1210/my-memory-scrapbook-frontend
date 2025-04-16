@@ -1,7 +1,5 @@
-// netlify/functions/addMemory.js
-console.log('Current working directory:', __dirname);
 const connectToDatabase = require('./db');
-const Memory = require('./models/memory');  // Adjusted to the correct path
+const Memory = require('./models/memory');  // Adjust to your correct path
 
 exports.handler = async function (event, context) {
   await connectToDatabase();
@@ -13,6 +11,7 @@ exports.handler = async function (event, context) {
     };
   }
 
+  // Parse the request body to extract memory data
   const { title, description, category, date } = JSON.parse(event.body);
 
   try {
