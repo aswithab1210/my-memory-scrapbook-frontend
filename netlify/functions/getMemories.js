@@ -1,21 +1,25 @@
-// netlify/functions/getMemories.js
-const connectToDatabase = require('./db');
-const Memory = require('../models/memory');  // Ensure this is the correct relative path
+const mongoose = require('mongoose');
+const Memory = require('./models/memory'); // ✅ Corrected path
 
+// Connect to DB
+const connectDB = async () => {
+  if (mongoose.connection.readyState === 1) return;
+  await mongoose.connect(process.env.MONGO_URI);
+};
+
+// Handler
 exports.handler = async function (event, context) {
-  await connectToDatabase();
-
   try {
-    const memories = await Memory.find();
+    await connectDB();
+    const memories = await Memory.find({});
     return {
       statusCode: 200,
       body: JSON.stringify(memories),
     };
   } catch (error) {
-    console.error('Error fetching memories:', error);
     return {
-      statusCode: 400,
-      body: JSON.stringify({ message: 'Error fetching memories' }),
+      statusCode: 500,
+      body: JSON.stringify({ message: "Server error", error: error.message }),
     };
   }
 };
