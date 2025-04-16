@@ -11,10 +11,13 @@ const App = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [editMemoryId, setEditMemoryId] = useState(null);
 
-  // Fetch memories from the backend when the component mounts
+  // ✅ API base URL for Netlify Function
+  const apiBase = "/.netlify/functions/memories";
+
+  // Fetch memories on mount
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/memories")
+      .get(apiBase)
       .then((response) => {
         setMemories(response.data);
       })
@@ -23,7 +26,7 @@ const App = () => {
       });
   }, []);
 
-  // Handle category change from Sidebar
+  // Handle Sidebar category change
   const handleCategoryChange = (category) => {
     setSelectedCategory(category === "All Categories" ? "" : category);
   };
@@ -32,7 +35,7 @@ const App = () => {
   const handleAddMemory = (memory) => {
     if (editMemoryId) {
       axios
-        .put(`http://localhost:5000/api/memories/${editMemoryId}`, memory)
+        .put(`${apiBase}/${editMemoryId}`, memory)
         .then((response) => {
           const updatedMemory = response.data;
           setMemories((prev) =>
@@ -44,7 +47,7 @@ const App = () => {
         .catch((err) => console.error("Error updating memory:", err));
     } else {
       axios
-        .post("http://localhost:5000/api/memories", memory)
+        .post(apiBase, memory)
         .then((response) => {
           setMemories((prev) => [...prev, response.data]);
         })
@@ -55,7 +58,7 @@ const App = () => {
     setEditMemoryId(null);
   };
 
-  // When user clicks Edit button on a memory
+  // Start editing memory
   const handleEdit = (id) => {
     const memoryToEdit = memories.find((memory) => memory._id === id);
     if (memoryToEdit) {
@@ -67,21 +70,23 @@ const App = () => {
   // Delete memory
   const handleDelete = (id) => {
     axios
-      .delete(`http://localhost:5000/api/memories/${id}`)
+      .delete(`${apiBase}/${id}`)
       .then(() => {
         setMemories((prev) => prev.filter((memory) => memory._id !== id));
       })
       .catch((err) => console.error("Error deleting memory:", err));
   };
 
-  // Export as CSV
+  // Export all memories to CSV
   const handleExport = () => {
-    const memoriesToExport = memories.map(({ title, description, category, date }) => ({
-      title,
-      description,
-      category,
-      date,
-    }));
+    const memoriesToExport = memories.map(
+      ({ title, description, category, date }) => ({
+        title,
+        description,
+        category,
+        date,
+      })
+    );
 
     const csv = Papa.unparse(memoriesToExport);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -91,14 +96,14 @@ const App = () => {
     link.click();
   };
 
-  // Apply category filter
+  // Filter by category if selected
   const filteredMemories = selectedCategory
     ? memories.filter((memory) => memory.category === selectedCategory)
     : memories;
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Top Navigation Bar */}
+      {/* Top Navigation */}
       <div className="fixed top-0 left-0 right-0 bg-gray-900 text-white p-4 z-10 shadow-md">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Memory Scrapbook</h1>
@@ -108,7 +113,7 @@ const App = () => {
         </div>
       </div>
 
-      {/* Content Wrapper with padding to avoid overlap */}
+      {/* Main Layout */}
       <div className="flex flex-1 pt-16 pb-16 sm:pb-0">
         {/* Sidebar */}
         <Sidebar
@@ -118,7 +123,7 @@ const App = () => {
           memories={memories}
         />
 
-        {/* Memory Cards Display */}
+        {/* Memory Display */}
         <div className="flex-grow p-4 overflow-y-auto bg-gray-50 flex justify-center sm:justify-start sm:items-start items-center">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-center">
             {filteredMemories.map((memory) => (
@@ -131,7 +136,7 @@ const App = () => {
             ))}
           </div>
 
-          {/* Add / Edit Modal */}
+          {/* Modal for Add/Edit */}
           {isModalOpen && (
             <AddMemoryForm
               onSave={handleAddMemory}
