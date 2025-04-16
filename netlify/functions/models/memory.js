@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Memory = require("../../src/models/Memory");  // Corrected path to your model
+const Memory = require("src\models\Memory.js");  // Corrected path to your model
 
 const uri = "mongodb+srv://aswithakousi:aswithab1210A@cluster0.x1k85bm.mongodb.net/memory-scrapbook?retryWrites=true&w=majority&appName=Cluster0";
 
