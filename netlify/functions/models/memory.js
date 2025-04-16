@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Memory = require("./models/memory"); // wherever your schema is saved
+const Memory = require("../src/models/Memory"); // wherever your schema is saved
 
 const uri = "mongodb+srv://aswithakousi:aswithab1210A@cluster0.x1k85bm.mongodb.net/memory-scrapbook?retryWrites=true&w=majority&appName=Cluster0";
 
