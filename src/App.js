@@ -3,8 +3,8 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import MemoryCard from "./components/MemoryCard";
 import AddMemoryForm from "./components/AddMemoryForm";
-import Papa from "papaparse";
 import axios from "axios";
+import Papa from "papaparse";
 
 const App = () => {
   const [memories, setMemories] = useState([]);
@@ -12,70 +12,117 @@ const App = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [editMemoryId, setEditMemoryId] = useState(null);
 
+  // ✅ API base URL for Netlify Function
+  const apiBase = "/.netlify/functions/models/memory";
+
+  // Fetch memories on mount
   useEffect(() => {
     axios
-      .get("/.netlify/functions/getMemory")
-      .then((res) => setMemories(res.data))
-      .catch((err) => console.error("Fetch error:", err));
+      .get(apiBase)
+      .then((response) => {
+        setMemories(response.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching memories:", err);
+      });
   }, []);
 
+  // Handle Sidebar category change
   const handleCategoryChange = (category) => {
     setSelectedCategory(category === "All Categories" ? "" : category);
   };
 
+  // Add or Edit Memory
   const handleAddMemory = (memory) => {
     if (editMemoryId) {
+      // PUT request for updating an existing memory
       axios
-        .put(`/.netlify/functions/editMemory/${editMemoryId}`, memory)
-        .then((res) => {
-          const updated = res.data;
+        .put(`${apiBase}/${editMemoryId}`, memory)
+        .then((response) => {
+          const updatedMemory = response.data;
           setMemories((prev) =>
-            prev.map((m) => (m._id === updated._id ? updated : m))
+            prev.map((item) =>
+              item._id === updatedMemory._id ? updatedMemory : item
+            )
           );
         })
-        .catch((err) => console.error("Update error:", err));
+        .catch((err) => console.error("Error updating memory:", err));
     } else {
+      // POST request for adding a new memory
       axios
-        .post("/.netlify/functions/addMemory", memory)
-        .then((res) => setMemories((prev) => [...prev, res.data]))
-        .catch((err) => console.error("Add error:", err));
+        .post(apiBase, memory)
+        .then((response) => {
+          setMemories((prev) => [...prev, response.data]);
+        })
+        .catch((err) => console.error("Error adding memory:", err));
     }
 
     setIsModalOpen(false);
     setEditMemoryId(null);
   };
 
+  // Start editing memory
   const handleEdit = (id) => {
-    setEditMemoryId(id);
-    setIsModalOpen(true);
+    const memoryToEdit = memories.find((memory) => memory._id === id);
+    if (memoryToEdit) {
+      setEditMemoryId(id);
+      setIsModalOpen(true);
+    }
   };
 
+  // Delete memory
   const handleDelete = (id) => {
     axios
-      .delete(`/.netlify/functions/deleteMemory/${id}`)
-      .then(() =>
-        setMemories((prev) => prev.filter((memory) => memory._id !== id))
-      )
-      .catch((err) => console.error("Delete error:", err));
+      .delete(`${apiBase}/${id}`)
+      .then(() => {
+        setMemories((prev) => prev.filter((memory) => memory._id !== id));
+      })
+      .catch((err) => console.error("Error deleting memory:", err));
   };
 
+  // Export all memories to CSV
+  const handleExport = () => {
+    const memoriesToExport = memories.map(
+      ({ title, description, category, date }) => ({
+        title,
+        description,
+        category,
+        date,
+      })
+    );
+
+    const csv = Papa.unparse(memoriesToExport);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "memories.csv";
+    link.click();
+  };
+
+  // Filter by category if selected
   const filteredMemories = selectedCategory
-    ? memories.filter((m) => m.category === selectedCategory)
+    ? memories.filter((memory) => memory.category === selectedCategory)
     : memories;
 
   return (
     <div className="flex flex-col h-screen">
+      {/* Top Navigation */}
       <div className="fixed top-0 left-0 right-0 bg-gray-900 text-white p-4 z-10 shadow-md">
-        <div className="flex justify-between">
+        <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Memory Scrapbook</h1>
-          <span className="text-gray-300">Welcome, User!</span>
+          <div className="flex items-center space-x-4">
+            <span className="text-gray-300">Welcome, User!</span>
+          </div>
         </div>
       </div>
 
+      {/* Main Layout */}
       <div className="flex flex-1 pt-16 pb-16 sm:pb-0">
+        {/* Sidebar */}
         <Sidebar
           onCategoryChange={handleCategoryChange}
           setIsModalOpen={setIsModalOpen}
+          handleExport={handleExport}
           memories={memories}
         />
 
@@ -91,6 +138,7 @@ const App = () => {
             ))}
           </div>
 
+          {/* Modal for Add/Edit */}
           {isModalOpen && (
             <AddMemoryForm
               onSave={handleAddMemory}
