@@ -12,7 +12,7 @@ const App = () => {
   const [editMemoryId, setEditMemoryId] = useState(null);
 
   // ✅ API base URL for Netlify Function
-  const apiBase = "/.netlify/functions/memories";
+  const apiBase = "/.netlify/functions/models/memory";
 
   // Fetch memories on mount
   useEffect(() => {
