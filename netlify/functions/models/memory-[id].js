@@ -14,34 +14,39 @@ async function connectToDatabase() {
 exports.handler = async (event) => {
   await connectToDatabase();
 
-  switch (event.httpMethod) {
-    case "GET":
-      try {
-        const memories = await Memory.find({});
-        return {
-          statusCode: 200,
-          body: JSON.stringify(memories),
-        };
-      } catch (error) {
-        return {
-          statusCode: 500,
-          body: JSON.stringify({ message: "Error fetching memories" }),
-        };
-      }
+  const { id } = event.pathParameters;
 
-    case "POST":
+  switch (event.httpMethod) {
+    case "PUT":
       try {
         const { title, description, category, date } = JSON.parse(event.body);
-        const newMemory = new Memory({ title, description, category, date });
-        await newMemory.save();
+        const updatedMemory = await Memory.findByIdAndUpdate(
+          id,
+          { title, description, category, date },
+          { new: true }
+        );
         return {
-          statusCode: 201,
-          body: JSON.stringify(newMemory),
+          statusCode: 200,
+          body: JSON.stringify(updatedMemory),
         };
       } catch (error) {
         return {
           statusCode: 400,
-          body: JSON.stringify({ message: "Error adding memory" }),
+          body: JSON.stringify({ message: "Error updating memory" }),
+        };
+      }
+
+    case "DELETE":
+      try {
+        await Memory.findByIdAndDelete(id);
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ message: "Memory deleted" }),
+        };
+      } catch (error) {
+        return {
+          statusCode: 400,
+          body: JSON.stringify({ message: "Error deleting memory" }),
         };
       }
 
