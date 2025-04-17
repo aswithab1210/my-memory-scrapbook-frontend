@@ -1,10 +1,24 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const memorySchema = new mongoose.Schema({
-  title: String,
-  description: String,
-  category: String,
-  date: String,
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  category: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.models.Memory || mongoose.model("Memory", memorySchema);
+const Memory = mongoose.models.Memory || mongoose.model('Memory', memorySchema);
+
+module.exports = Memory;
