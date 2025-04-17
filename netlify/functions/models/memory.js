@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Memory = require("../../netlify/functions/model/Memory"); // Corrected path to your model
+const Memory = require("../model/Memory"); 
 
 const uri = "mongodb+srv://aswithakousi:aswithab1210A@cluster0.x1k85bm.mongodb.net/memory-scrapbook?retryWrites=true&w=majority&appName=Cluster0";
 
